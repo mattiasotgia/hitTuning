@@ -1,5 +1,8 @@
 # Hit Tuning Directory
 
+> *Disclaimer* :shipit:\
+> The work of this repository was developed by M Carrigan (<mcarrig@fnal.gov>), original repository lives in [carriganm95:icarusProjects/hitTuning](https://github.com/carriganm95/icarusProjects/tree/master/hitTuning). 
+
 This directory contains scripts used in determining the parameters to be used for hit finding in ICARUS. There are tools for creating and running a grid search over parameters on the grid.
 
 ## hitTuning.py
