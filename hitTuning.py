@@ -843,7 +843,7 @@ if __name__ == "__main__":
     MC = args.mc
     fileSubStr = args.tag
 
-    #create the fcl files for a grid search
+    #create the fcl files for a grid search, and then exit...
     if args.createGrid:
         paramGrid = createGrid()
         for ip, params in enumerate(paramGrid):
@@ -851,13 +851,18 @@ if __name__ == "__main__":
                 if ip > 1: break
             if ip % 100 == 0:
                 print(f"Creating FCL for parameter set {ip}/{len(paramGrid)}")
-            outputFCL = f'{outputDir}/hitTuning_{fileSubStr}_{ip}.fcl'
+            
+            if not os.path.exists(args.outputDir):
+                os.makedirs(args.outputDir)
+            outputFCL = f'{args.outputDir}/hitTuning_{fileSubStr}_{ip}.fcl'
             if MC:
                 generateFCLMC(params, outputFile=outputFCL, verbose=args.verbose)
             else:   
                 generateFCL(params, outputFile=outputFCL, verbose=args.verbose)
         exit(0)
 
+
+    # Here the code is activated if the -c option in not present...
     # Initialize database
     db = HitTuningDB(f"hitTuning_{fileSubStr}.db")
 
@@ -1001,42 +1006,43 @@ if __name__ == "__main__":
             outputFile = f'{outputDir}/output_{fileSubStr}_{version}.root'
 
             while os.path.exists(outputFCL):
+
+                # Generate FCL file
+                if MC:
+                    generateFCLMC(params, outputFile=outputFCL)
+                else:   
+                    generateFCL(params, outputFile=outputFCL)
+
+                # Add to database   
+                run_id = db.add_run(params, args.runNumber, outputFCL, notes="") 
+                print(f"Added run with ID: {run_id}")
+
+                if args.debug:
+                    options = '-n 2'  # Process only 1 events in debug mode
+                else:
+                    options = None
+                # Run lar with generated FCL
+                run(outputFCL, inputFile, outputFile, options=options)
+                
+                # Later, update with output filename
+                db.update_output_filename(run_id, outputFile)
+                
+                # Query runs
+                all_runs = db.get_all_runs()
+                print(f"Total runs in database: {len(all_runs)}")
+
+                histFile = f'{outputDir}/hist_output_{fileSubStr}_{version}.root'
+
+                if args.mc:
+                    results = r.galleryMC(outputFile, histFile)
+                    print("results:", results)
+                    db.update_results(run_id, results)
+                else:
+                    r.galleryMacro(outputFile, histFile)
+                
                 version += 1
                 outputFCL = f'{outputDir}/hitTuning_{fileSubStr}_{version}.fcl'
                 outputFile = f'{outputDir}/output_{fileSubStr}_{version}.root'
-
-            # Generate FCL file
-            if MC:
-                generateFCLMC(params, outputFile=outputFCL)
-            else:   
-                generateFCL(params, outputFile=outputFCL)
-
-            # Add to database   
-            run_id = db.add_run(params, args.runNumber, outputFCL, notes="") 
-            print(f"Added run with ID: {run_id}")
-
-            if args.debug:
-                options = '-n 2'  # Process only 1 events in debug mode
-            else:
-                options = None
-            # Run lar with generated FCL
-            run(outputFCL, inputFile, outputFile, options=options)
-            
-            # Later, update with output filename
-            db.update_output_filename(run_id, outputFile)
-            
-            # Query runs
-            all_runs = db.get_all_runs()
-            print(f"Total runs in database: {len(all_runs)}")
-
-            histFile = f'{outputDir}/hist_output_{fileSubStr}_{version}.root'
-
-            if args.mc:
-                results = r.galleryMC(outputFile, histFile)
-                print("results:", results)
-                db.update_results(run_id, results)
-            else:
-                r.galleryMacro(outputFile, histFile)
         
         except Exception as e:
             print(f"Error processing parameter set {ip}: {e}")
