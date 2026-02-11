@@ -822,9 +822,9 @@ def parse_args() -> argparse.Namespace:
         Namespace containing parsed arguments
     """
     parser = argparse.ArgumentParser(description="Hit Tuning Parameter Scan")
-    parser.add_argument('-c', '--createGrid', action='store_true', help='Create all fcl files for parameter grid')
+    parser.add_argument('-c', '--createGrid', action='store_true', help='Create all fcl files for parameter grid') # creating the FHiCL grid ~2880 files
     parser.add_argument('-o', '--outputDir', type=str, default='./fclFiles', help='Output directory')
-    parser.add_argument('--mc', action='store_true', help='Run on MC data')
+    parser.add_argument('--mc', action='store_true', help='Run on MC data') # This when training and/or generating FHiCL is used
     parser.add_argument('-t', '--tag', type=str, default='test', help='Tag for output files')
     parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mode')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
@@ -932,7 +932,7 @@ if __name__ == "__main__":
         print(f"Added run with ID: {run_id}")
 
         # Run lar with generated FCL
-        run(fclFile, inputFile, outputFile, options='-n 5')
+        run(fclFile, inputFile, outputFile, options='-n-1')
         
         # Later, update with output filename
         db.update_output_filename(run_id, outputFile)
@@ -1006,43 +1006,42 @@ if __name__ == "__main__":
             outputFile = f'{outputDir}/output_{fileSubStr}_{version}.root'
 
             while os.path.exists(outputFCL):
-
-                # Generate FCL file
-                if MC:
-                    generateFCLMC(params, outputFile=outputFCL)
-                else:   
-                    generateFCL(params, outputFile=outputFCL)
-
-                # Add to database   
-                run_id = db.add_run(params, args.runNumber, outputFCL, notes="") 
-                print(f"Added run with ID: {run_id}")
-
-                if args.debug:
-                    options = '-n 2'  # Process only 1 events in debug mode
-                else:
-                    options = None
-                # Run lar with generated FCL
-                run(outputFCL, inputFile, outputFile, options=options)
-                
-                # Later, update with output filename
-                db.update_output_filename(run_id, outputFile)
-                
-                # Query runs
-                all_runs = db.get_all_runs()
-                print(f"Total runs in database: {len(all_runs)}")
-
-                histFile = f'{outputDir}/hist_output_{fileSubStr}_{version}.root'
-
-                if args.mc:
-                    results = r.galleryMC(outputFile, histFile)
-                    print("results:", results)
-                    db.update_results(run_id, results)
-                else:
-                    r.galleryMacro(outputFile, histFile)
-                
                 version += 1
                 outputFCL = f'{outputDir}/hitTuning_{fileSubStr}_{version}.fcl'
                 outputFile = f'{outputDir}/output_{fileSubStr}_{version}.root'
+
+            # Generate FCL file
+            if MC:
+                generateFCLMC(params, outputFile=outputFCL)
+            else:   
+                generateFCL(params, outputFile=outputFCL)
+
+            # Add to database   
+            run_id = db.add_run(params, args.runNumber, outputFCL, notes="") 
+            print(f"Added run with ID: {run_id}")
+
+            if args.debug:
+                options = '-n 2'  # Process only 1 events in debug mode
+            else:
+                options = None
+            # Run lar with generated FCL
+            run(outputFCL, inputFile, outputFile, options=options)
+            
+            # Later, update with output filename
+            db.update_output_filename(run_id, outputFile)
+            
+            # Query runs
+            all_runs = db.get_all_runs()
+            print(f"Total runs in database: {len(all_runs)}")
+
+            histFile = f'{outputDir}/hist_output_{fileSubStr}_{version}.root'
+
+            if args.mc:
+                results = r.galleryMC(outputFile, histFile)
+                print("results:", results)
+                db.update_results(run_id, results)
+            else:
+                r.galleryMacro(outputFile, histFile)
         
         except Exception as e:
             print(f"Error processing parameter set {ip}: {e}")

@@ -71,7 +71,7 @@ fi
 # Copy tarball if needed
 if [ -n "$tarFile" ] && ( [ ! -f ${sourceDir}/${tarFile} ] || [ "$recopy" = true ] ); then
     echo "Copying tar file to scratch area"
-    cp /pnfs/icarus/scratch/users/micarrig/${tarFile} ${sourceDir}/.
+    cp /pnfs/icarus/scratch/users/${USER}/${tarFile} ${sourceDir}/.
 fi
 
 # Copy analysis script if needed
@@ -83,7 +83,7 @@ fi
 # Copy Python packages if needed
 if [ -n "$pythonPackages" ] && ( [ ! -f ${sourceDir}/${pythonPackages} ] || [ "$recopy" = true ] ); then
     echo "Copying python packages file to scratch area"
-    cp /pnfs/icarus/scratch/users/micarrig/${pythonPackages} ${sourceDir}/.
+    cp /pnfs/icarus/scratch/users/${USER}/${pythonPackages} ${sourceDir}/.
 fi
 
 # Copy file list if needed

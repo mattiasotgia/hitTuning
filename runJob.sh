@@ -167,7 +167,7 @@ ls -alh "${work_dir}"
 # Setup ICARUS Code
 # ==============================================================================
 
-if ! setup icaruscode v10_06_00_07 -q e26:prof; then
+if ! setup icaruscode v10_06_00_06p03 -q e26:prof; then
     echo "ERROR: setup icaruscode failed" >&2
     cleanup_and_exit 30
 else
