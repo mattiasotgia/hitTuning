@@ -11,17 +11,22 @@ Main script for hit finding parameter optimization. Can be run interactively or 
 
 ### Purpose
 - Modify FCL configuration files with custom hit finding parameters
-- Run hit finding with specific parameter sets
+- Run hit finding (over FermiGrid) with specific parameter sets
 - Create FCL files for grid search parameter scans
 
 ### Command Line Options
 - `-c, --createFcls`: Create FCL files for grid search (does not run jobs)
-- `-i, --inputFcl`: Input FCL template file path
-- `-o, --outputDir`: Directory for output files
-- `-d, --dataFile`: Input data file to process
-- `-r, --run`: Run number
-- `-s, --subrun`: Subrun number
-- `-e, --event`: Event number
+   - This can take also the option(s)
+      - `-o OUTPUTDIR, --outputDir OUTPUTDIR`: Directory for output files
+      - `--mc`: Generating FHiCLs for the processing of MC data
+      - `--overlays`: Generating FHiCLs for the processing of MC overlay data (WIP)
+      - `-t TAG, --tag TAG`: Add a tag to generated FHiCLs
+- `-r, --runGrid`: Command to run the FHiCL over the input file(s), option used on grid...
+   - Requires 
+      - `-i INPUTFILE, --inputFile INPUTFILE`: File(s) taken as input to the `lar` command
+      - `-f FCLFILE, --fclFile FCLFILE`: FHiCL file to be run
+      - `-n RUNNUMBER, --runNumber RUNNUMBER`: Still to understand [@mattiasotgia](https://github.com/mattiasotgia/)
+      - `-p PATH, --path PATH`: Here you should indicate where to look for the `art/gallery` macros that compute the metric
 
 ### Parameters Tunable
 The script supports modification of the following hit finding parameters (per plane or global):
@@ -61,6 +66,8 @@ Gallery macros that run on Wire, ChannelROI, and Hit data products.
 **Input Requirements**:
 - MC (Monte Carlo) simulation files
 - Must contain: Wire, Hit, and SimChannel/IDE truth information
+
+> Comment [@mattiasotgia](https://github.com/mattiasotgia/): Here we should be aware that for MC+Overlay this is only going to operate on the object created by the YS simulation... is this what we whant?
 
 **Output**:
 - Hit vs truth IDE energy per event
@@ -106,6 +113,8 @@ Uses Fermilab jobsub system for job submission.
 
 ## mergeDBFiles.py
 
+Once the above is complete, proceed with the following...
+
 Merge multiple SQLite database files from a grid search into a single database.
 
 ### Purpose
@@ -116,7 +125,7 @@ Edit the script to specify:
 - `inputDir`: Directory containing .db files from grid jobs
 - `dest_db`: Path to output merged database file
 
-```python
+```bash
 python mergeDBFiles.py
 ```
 
