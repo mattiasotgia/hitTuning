@@ -9,22 +9,23 @@
 # ==============================================================================
 
 # Source directory on the grid storage
-sourceDir="/pnfs/icarus/scratch/users/micarrig/hitTuning/mc/gridTest/"
+sourceDir="/pnfs/icarus/scratch/users/msotgia/hitTuning/mc/gridBNBFluxSearchSmall/"
 
 # Main executable script to run on grid nodes
 exe="runJob.sh"
 
 # Export variables for grid jobs
-export fclFile=""                    # FCL configuration file (if needed)
-export tarFile="hitTuning.tar.gz"    # Tarball with code and dependencies
-export fileList=""                   # List of input files (if needed)
-export outputDir=$sourceDir          # Output directory for results
-export nEvents=-1                    # Number of events to process (-1 = all)
-export anaFile="hitTuning.py"        # Analysis script
-export treeName=""                   # Tree name for validation (optional)
+export fclFile=""                               # FCL configuration file (if needed)
+export tarFile="hitTuningInstallBNBFlux.tar.gz" # Tarball with code and dependencies
+export fileList=""                              # List of input files (if needed)
+export outputDir=$sourceDir                     # Output directory for results
+export nEvents=-1                               # Number of events to process (-1 = all)
+export anaFile="hitTuning.py"                   # Analysis script
+export treeName=""                              # Tree name for validation (optional)
+export gridFclPath="testOne"
 
 # Calculate number of jobs from FCL files
-nJobs=$(ls -l ${sourceDir}/gridFcl/*.fcl | wc -l)
+nJobs=$(ls -l $PWD/$gridFclPath/*.fcl | wc -l)
 
 # Recopy files to grid storage?
 recopy=false
@@ -71,7 +72,7 @@ fi
 # Copy tarball if needed
 if [ -n "$tarFile" ] && ( [ ! -f ${sourceDir}/${tarFile} ] || [ "$recopy" = true ] ); then
     echo "Copying tar file to scratch area"
-    cp /pnfs/icarus/scratch/users/${USER}/${tarFile} ${sourceDir}/.
+    cp $PWD/${tarFile} ${sourceDir}/.
 fi
 
 # Copy analysis script if needed
@@ -83,13 +84,13 @@ fi
 # Copy Python packages if needed
 if [ -n "$pythonPackages" ] && ( [ ! -f ${sourceDir}/${pythonPackages} ] || [ "$recopy" = true ] ); then
     echo "Copying python packages file to scratch area"
-    cp /pnfs/icarus/scratch/users/${USER}/${pythonPackages} ${sourceDir}/.
+    cp $PWD/${pythonPackages} ${sourceDir}/.
 fi
 
 # Copy file list if needed
 if [ -n "$fileList" ] && ( [ ! -f ${sourceDir}/${fileList} ] || [ "$recopy" = true ] ); then
     echo "Copying file list to scratch area"
-    cp ${fileList} ${sourceDir}/.
+    cp $PWD/${fileList} ${sourceDir}/.
 fi
 
 # ==============================================================================
@@ -105,7 +106,7 @@ echo "Using executable $exe and tar file $tarFile"
 echo "Output will be stored in $outputDir"
 
 # Build jobsub_submit command with resource requirements
-jobsub_cmd="jobsub_submit -G icarus -N ${nJobs} --maxConcurrent 50 --expected-lifetime=18h --disk=25GB --memory=8000MB -e IFDH_CP_MAXRETRIES=4 -e IFDH_CP_UNLINK_ON_ERROR=2 --lines '+FERMIHTC_AutoRelease=True' --lines '+FERMIHTC_GraceMemory=4096' --lines '+FERMIHTC_GraceLifetime=3600' -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7\:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true)'"
+jobsub_cmd="jobsub_submit -G icarus -N ${nJobs} --maxConcurrent 150 --expected-lifetime=18h --disk=100GB --memory=8000MB -e IFDH_CP_MAXRETRIES=4 -e IFDH_CP_UNLINK_ON_ERROR=2 --lines '+FERMIHTC_AutoRelease=True' --lines '+FERMIHTC_GraceMemory=4096' --lines '+FERMIHTC_GraceLifetime=3600' -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7\:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true)'"
 
 # Add tarball to command if specified
 if [ -n "$tarFile" ] && [ -f "${sourceDir}/${tarFile}" ]; then
