@@ -189,3 +189,10 @@ python eventDisplay.py -i reco_file.root -e 25 -p 0 -v -d
 - gallery framework
 - LArSoft data products
 - ICARUS-specific products
+
+
+# Changelog
+
+```bash
+tar -czf hitTuningInstallBNBFlux.tar.gz icaruscode/ icarusalg/ sbncode/ sbnalg/ larreco/ pmt_speareas_data.db Responses/ .mrbversion .upsfiles/ setup gridFcl/ gridSkimFiles.list galleryMC.cpp galleryMacro.cpp 
+```

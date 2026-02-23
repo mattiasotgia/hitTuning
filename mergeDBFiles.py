@@ -77,8 +77,8 @@ def merge_sqlite_dbs(db_files, dest_db, table="runs", conflict="ignore"):
 
 if __name__ == "__main__":
 
-    inputDir = '/nashome/m/micarrig/icarus/hitTuning/gridDBV2/'
-    dest_db = '/nashome/m/micarrig/icarus/hitTuning/hitTuning_merged_v2.db'
+    inputDir = '/exp/icarus/app/users/msotgia/analysis/twoDRecoStudies/hitTuning/dbs'
+    dest_db = '/exp/icarus/app/users/msotgia/analysis/twoDRecoStudies/hitTuning/hitTuning_merged_test.db'
 
     db_files = []
     counter = 0

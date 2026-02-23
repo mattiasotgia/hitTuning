@@ -731,6 +731,92 @@ physics.end_paths: [ outana, stream1 ]
     with open(outputFile, 'w') as f:
         f.write(fclStr)
 
+def generateFCLOverlay(params: fclParams, outputFile: str = "hitTuning.fcl", verbose: bool = False) -> None:
+    """Generate FCL configuration file for overlay data processing.
+    
+    Args:
+        params: FCL parameters to use in configuration
+        outputFile: Path to output FCL file
+        verbose: Whether to print parameters to console
+    """
+    if verbose:
+        print("Generating new FHICL Overlay file with the following parameters:")
+        print(params.__str__())
+
+    fclStr=f'''
+#includes"stage1_run2_larcv_icarus_overlay.fcl"
+
+physics.producers.gaushit2dTPCEE.HitFinderToolVec.CandidateHitsPlane0.RoiThreshold:      {params.roiThreshold[0]}
+physics.producers.gaushit2dTPCEE.HitFinderToolVec.CandidateHitsPlane1.RoiThreshold:      {params.roiThreshold[1]}
+physics.producers.gaushit2dTPCEE.HitFinderToolVec.CandidateHitsPlane2.RoiThreshold:      {params.roiThreshold[2]}
+physics.producers.gaushit2dTPCEE.HitFilterAlg.MinPulseHeight:                            {params.minPulseHeight}
+physics.producers.gaushit2dTPCEE.HitFilterAlg.MinPulseSigma:                             {params.minPulseSigma}
+physics.producers.gaushit2dTPCEE.LongMaxHits:                                            {params.LongMaxHits}
+physics.producers.gaushit2dTPCEE.LongPulseWidth:                                         {params.LongPulseWidth}
+physics.producers.gaushit2dTPCEE.PulseHeightCuts:                                        {params.PulseHeightCuts}
+physics.producers.gaushit2dTPCEE.PulseWidthCuts:                                         {params.PulseWidthCuts}
+physics.producers.gaushit2dTPCEE.PulseRatioCuts:                                         {params.PulseRatioCuts}
+physics.producers.gaushit2dTPCEE.MaxMultiHit:                                            {params.MaxMultiHit}
+physics.producers.gaushit2dTPCEE.Chi2NDF:                                                {params.Chi2NDF}
+
+physics.producers.gaushit2dTPCEW.HitFinderToolVec.CandidateHitsPlane0.RoiThreshold:      {params.roiThreshold[0]}
+physics.producers.gaushit2dTPCEW.HitFinderToolVec.CandidateHitsPlane1.RoiThreshold:      {params.roiThreshold[1]}
+physics.producers.gaushit2dTPCEW.HitFinderToolVec.CandidateHitsPlane2.RoiThreshold:      {params.roiThreshold[2]}
+physics.producers.gaushit2dTPCEW.HitFilterAlg.MinPulseHeight:                            {params.minPulseHeight}
+physics.producers.gaushit2dTPCEW.HitFilterAlg.MinPulseSigma:                             {params.minPulseSigma}
+physics.producers.gaushit2dTPCEW.LongMaxHits:                                            {params.LongMaxHits}
+physics.producers.gaushit2dTPCEW.LongPulseWidth:                                         {params.LongPulseWidth}
+physics.producers.gaushit2dTPCEW.PulseHeightCuts:                                        {params.PulseHeightCuts}
+physics.producers.gaushit2dTPCEW.PulseWidthCuts:                                         {params.PulseWidthCuts}
+physics.producers.gaushit2dTPCEW.PulseRatioCuts:                                         {params.PulseRatioCuts}
+physics.producers.gaushit2dTPCEW.MaxMultiHit:                                            {params.MaxMultiHit}
+physics.producers.gaushit2dTPCEW.Chi2NDF:                                                {params.Chi2NDF}
+
+physics.producers.gaushit2dTPCWE.HitFinderToolVec.CandidateHitsPlane0.RoiThreshold:      {params.roiThreshold[0]}
+physics.producers.gaushit2dTPCWE.HitFinderToolVec.CandidateHitsPlane1.RoiThreshold:      {params.roiThreshold[1]}
+physics.producers.gaushit2dTPCWE.HitFinderToolVec.CandidateHitsPlane2.RoiThreshold:      {params.roiThreshold[2]}
+physics.producers.gaushit2dTPCWE.HitFilterAlg.MinPulseHeight:                            {params.minPulseHeight}
+physics.producers.gaushit2dTPCWE.HitFilterAlg.MinPulseSigma:                             {params.minPulseSigma}
+physics.producers.gaushit2dTPCWE.LongMaxHits:                                            {params.LongMaxHits}
+physics.producers.gaushit2dTPCWE.LongPulseWidth:                                         {params.LongPulseWidth}
+physics.producers.gaushit2dTPCWE.PulseHeightCuts:                                        {params.PulseHeightCuts}
+physics.producers.gaushit2dTPCWE.PulseWidthCuts:                                         {params.PulseWidthCuts}
+physics.producers.gaushit2dTPCWE.PulseRatioCuts:                                         {params.PulseRatioCuts}
+physics.producers.gaushit2dTPCWE.MaxMultiHit:                                            {params.MaxMultiHit}
+physics.producers.gaushit2dTPCWE.Chi2NDF:                                                {params.Chi2NDF}
+
+physics.producers.gaushit2dTPCWW.HitFinderToolVec.CandidateHitsPlane0.RoiThreshold:      {params.roiThreshold[0]}
+physics.producers.gaushit2dTPCWW.HitFinderToolVec.CandidateHitsPlane1.RoiThreshold:      {params.roiThreshold[1]}
+physics.producers.gaushit2dTPCWW.HitFinderToolVec.CandidateHitsPlane2.RoiThreshold:      {params.roiThreshold[2]}
+physics.producers.gaushit2dTPCWW.HitFilterAlg.MinPulseHeight:                            {params.minPulseHeight}
+physics.producers.gaushit2dTPCWW.HitFilterAlg.MinPulseSigma:                             {params.minPulseSigma}
+physics.producers.gaushit2dTPCWW.LongMaxHits:                                            {params.LongMaxHits}
+physics.producers.gaushit2dTPCWW.LongPulseWidth:                                         {params.LongPulseWidth}
+physics.producers.gaushit2dTPCWW.PulseHeightCuts:                                        {params.PulseHeightCuts}
+physics.producers.gaushit2dTPCWW.PulseWidthCuts:                                         {params.PulseWidthCuts}
+physics.producers.gaushit2dTPCWW.PulseRatioCuts:                                         {params.PulseRatioCuts}
+physics.producers.gaushit2dTPCWW.MaxMultiHit:                                            {params.MaxMultiHit}
+physics.producers.gaushit2dTPCWW.Chi2NDF:                                                {params.Chi2NDF}
+
+physics.filters: {{}}
+
+physics.analyzers: {{}}
+
+physics.reco: [
+                gaushit2dTPCEW,
+                gaushit2dTPCEE,
+                gaushit2dTPCWW,
+                gaushit2dTPCWE
+            ]
+
+physics.outana:    [ ]
+
+physics.end_paths: [ outana, stream1 ]
+    '''
+
+    with open(outputFile, 'w') as f:
+        f.write(fclStr)
+
 def run(fclFile: str, inputFile: str, outputFile: str, options: Optional[str] = None) -> None:
     """Run LArSoft with specified FCL file and input.
     
@@ -777,16 +863,16 @@ def createGrid(defaultFirst: bool = True) -> List[fclParams]:
     """
     print("Creating parameter grid for hit tuning...")
 
-    v_roiThreshold = [[6.0], [5.0], [4.0], [3.0], [2.0], [1.0]]  
+    v_roiThreshold = [[8.0], [7.0], [6.0], [5.0], [4.0], [3.0], [2.0], [1.0]]  
     v_minPulseHeight = [[2.0]]
     v_minPulseSigma = [[1.0]]
-    v_LongMaxHits = [[1], [5], [10], [15]]
-    v_LongPulseWidth = [[2.0], [5.0], [8.0]]
+    v_LongMaxHits = [[1], [2], [5], [7], [10], [13], [15]]
+    v_LongPulseWidth = [[2.0], [3.0], [5.0], [6.0], [8.0], [10.0]]
     v_PulseHeightCuts = [[2], [3]]
     v_PulseWidthCuts = [[2, 1.5, 1]]  
     v_PulseRatioCuts = [[3.5e-1, 4e-1, 2e-1]]
     v_MaxMultiHit = [[5], [7], [10], [12]]
-    v_Chi2NDF = [[500.0], [1000.0], [1500.0], [2000.0], [2500.0]]
+    v_Chi2NDF = [[10], [20], [50], [100], [200], [500.0], [1000.0], [1500.0], [2000.0], [2500.0]]
 
     # Generate all combinations
     param_grid = []
@@ -825,6 +911,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('-c', '--createGrid', action='store_true', help='Create all fcl files for parameter grid') # creating the FHiCL grid ~2880 files
     parser.add_argument('-o', '--outputDir', type=str, default='./fclFiles', help='Output directory')
     parser.add_argument('--mc', action='store_true', help='Run on MC data') # This when training and/or generating FHiCL is used
+    parser.add_argument('--overlay', action='store_true', help='Run overlay FHiCL')
     parser.add_argument('-t', '--tag', type=str, default='test', help='Tag for output files')
     parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mode')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
@@ -855,10 +942,13 @@ if __name__ == "__main__":
             if not os.path.exists(args.outputDir):
                 os.makedirs(args.outputDir)
             outputFCL = f'{args.outputDir}/hitTuning_{fileSubStr}_{ip}.fcl'
-            if MC:
-                generateFCLMC(params, outputFile=outputFCL, verbose=args.verbose)
-            else:   
-                generateFCL(params, outputFile=outputFCL, verbose=args.verbose)
+            if args.overlay:
+                generateFCLOverlay(params, outputFile=outputFCL, verbose=args.verbose)
+            else:
+                if MC:
+                    generateFCLMC(params, outputFile=outputFCL, verbose=args.verbose)
+                else:   
+                    generateFCL(params, outputFile=outputFCL, verbose=args.verbose)
         exit(0)
 
 

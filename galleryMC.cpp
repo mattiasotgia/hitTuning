@@ -43,6 +43,11 @@ float getFillValue(float hitEnergy, float ideEnergy) {
     }
 }
 
+std::string notString(bool test, std::string name)
+{
+    return (test? "" : "!") + name;
+}
+
 // Function to draw wire waveform and overlay hit Gaussians
 TCanvas* wireDraw(const std::vector<recob::Hit>& hits,
                  const std::vector<recob::ChannelROI>& wires,
@@ -123,7 +128,7 @@ int getPlane(int channelID){
     return -1; // invalid channel
 }
 
-std::vector<std::vector<float>> galleryMC(std::string const& inputFile = "nominalTest.root", std::string const& outputFile = "histnominalTest.root") {
+std::vector<std::vector<float>> galleryMC(std::string const& inputFile = "nominalTest.root", std::string const& outputFile = "tmp/testOneGalleryMetric/histnominalTest.root") {
     gStyle->SetOptStat(0);
     gROOT->SetBatch(kTRUE);
 
@@ -343,10 +348,17 @@ std::vector<std::vector<float>> galleryMC(std::string const& inputFile = "nomina
             c_wire = wireDraw(hitsEE, wireEE, 609);
         }
 
+        int iassns = 0;
         for (auto it = hitTruthAssns.begin(); it != hitTruthAssns.end(); ++it) {
+            std::cout << "This is event " << ev.eventAuxiliary().event() << " and assns " << iassns << std::endl;
+            iassns++;
             auto const& [hit, mcpart, _unused] = *it; // unpack the 3 elements
             auto const& matchdata = hitTruthAssns.data(it); // Use iterator
             int plane = hit->WireID().getIndex<2>();
+
+            std::cout << "MCParticle has trackID " << mcpart->TrackId()
+                <<", with matched .energy " << matchdata.energy << " and .ideFrac " << matchdata.ideFraction << std::endl;
+
             if (abs(mcpart->PdgCode()) == 11){
                 if(matchdata.energy > 0) foundElectron = true;
                 if(matchdata.ideFraction > 0.5){
@@ -415,7 +427,14 @@ std::vector<std::vector<float>> galleryMC(std::string const& inputFile = "nomina
             evtCounter++;
             continue;
         }
-            
+
+        std::cout << "This is event " << ev.eventAuxiliary().event() << " and we have: " 
+                  << notString(foundElectron, "foundElectron") << " "
+                  << notString(foundPhoton, "foundPhoton") << " "
+                  << notString(foundMuon, "foundMuon") << " "
+                  << notString(foundPion, "foundPion") << " "
+                  << notString(foundProton, "foundProton") << std::endl;
+                  
         // from mcP get track ID -> get sim channel -> get ide -> get energy
         // sim channel (mcp.TrackId) -> ide -> energy
         int maxEParticle = -9999;
@@ -429,6 +448,8 @@ std::vector<std::vector<float>> galleryMC(std::string const& inputFile = "nomina
                 for (auto const& ide : kv.second) {
                     int trackID = ide.trackID;
                     float energy = ide.energy;
+
+                    std::cout << "Looping through IDEs, this has trackID " << trackID << " and energy " << energy << std::endl;
                     eventIdeEnergy[plane] += energy;
                     if (ide.energy > maxE) {
                         maxE = ide.energy;

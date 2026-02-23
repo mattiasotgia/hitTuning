@@ -167,7 +167,7 @@ ls -alh "${work_dir}"
 # Setup ICARUS Code
 # ==============================================================================
 
-if ! setup icaruscode v10_06_00_06p03 -q e26:prof; then
+if ! setup icaruscode v10_06_00_06p03 -q e26:prof -z ${INPUT_TAR_DIR_LOCAL}:${PRODUCTS}; then
     echo "ERROR: setup icaruscode failed" >&2
     cleanup_and_exit 30
 else
@@ -189,8 +189,10 @@ if [ -f "${CONDOR_DIR_INPUT}/python.tar.gz" ]; then
         echo "ERROR: Failed to extract python packages from python.tar.gz" >&2
         cleanup_and_exit 27
     }
-    export PYTHONPATH="${work_dir}/nashome/m/micarrig/.local/lib/python3.9/site-packages:${PYTHONPATH}"
+    source $work_dir/.env/bin/activate
     echo "PYTHONPATH is now: $PYTHONPATH"
+    echo "List of installed product"
+    pip list
 else
     echo "ERROR: Python packages tarball python.tar.gz not found in ${CONDOR_DIR_INPUT}" >&2
     cleanup_and_exit 28
@@ -241,9 +243,9 @@ echo "  Output file: ${outputFile}"
 echo "  FCL file: ${fclFile}"
 
 pushd "${work_dir}" >/dev/null
-echo "Executing: python3 ${macro_file} ${inputFile} ${work_dir}/${outputFile} ${fclFile} ${jobNum} ${INPUT_TAR_DIR_LOCAL}"
+echo "Executing: python ${macro_file} -r -i ${inputFile} -f ${fclFile} -n ${jobNum} -p ${INPUT_TAR_DIR_LOCAL} -o ${work_dir}/${outputFile}"
 
-if ! python3 ${macro_file} ${inputFile} ${work_dir}/${outputFile} ${fclFile} ${jobNum} ${INPUT_TAR_DIR_LOCAL}; then
+if ! python ${macro_file} -r -i ${inputFile} -f ${fclFile} -n ${jobNum} -p ${INPUT_TAR_DIR_LOCAL} -o ${work_dir}/${outputFile}; then
     popd >/dev/null
     echo "ERROR: Command failed for file $runFile with exit code $?" >&2
     cleanup_and_exit 40
@@ -278,16 +280,16 @@ if ! ifdh ls "$target_dir" >/dev/null 2>&1; then
 fi
 
 # Transfer output ROOT file
-if ! ifdh cp "${CONDOR_DIR_INPUT}/output_${jobNum}.root" "$target_dir/"; then
-    echo "ERROR: ifdh cp failed for output_${jobNum}.root -> $target_dir/" >&2
-    cleanup_and_exit 60
-fi
+# if ! ifdh cp "${CONDOR_DIR_INPUT}/output_${jobNum}.root" "$target_dir/"; then
+#     echo "ERROR: ifdh cp failed for output_${jobNum}.root -> $target_dir/" >&2
+#     cleanup_and_exit 60
+# fi
 
-# Transfer histogram ROOT file
-if ! ifdh cp "${work_dir}/hist_output_${jobNum}.root" "$target_dir/"; then
-    echo "ERROR: ifdh cp failed for hist_output_${jobNum}.root -> $target_dir/" >&2
-    cleanup_and_exit 61
-fi
+# # Transfer histogram ROOT file
+# if ! ifdh cp "${work_dir}/hist_output_${jobNum}.root" "$target_dir/"; then
+#     echo "ERROR: ifdh cp failed for hist_output_${jobNum}.root -> $target_dir/" >&2
+#     cleanup_and_exit 61
+# fi
 
 # Transfer database file
 if ! ifdh cp "${work_dir}/hitTuning_${jobNum}.db" "$target_dir/"; then
