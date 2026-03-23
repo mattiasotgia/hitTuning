@@ -31,13 +31,18 @@ cleanup_and_exit() {
     local exit_code=$1
     echo "Cleanup: transferring log files before exit with code $exit_code"
     
-    # Check if log directory exists, create if it doesn't
-    if ! ifdh ls "$log_dir" >/dev/null 2>&1; then
-        echo "Creating log directory: $log_dir"
-        ifdh mkdir "$log_dir" 2>/dev/null || true
-    fi
-
-    echo "Transferring log files to $log_dir"
+######
+#    Vito reply: this is not needed, the destination folder is created 
+#                automatically when files are copied back, ifdh mkdir 
+#                would just bail out without creating the folder
+#
+#   # Check if log directory exists, create if it doesn't
+#   # if ! ifdh ls "$log_dir" >/dev/null 2>&1; then
+#   #     echo "Creating log directory: $log_dir"
+#   #     ifdh mkdir "$log_dir" 2>/dev/null || true
+#   # fi
+#    echo "Transferring log files to $log_dir"
+######
     
     # Attempt to copy logs, but don't fail if it doesn't work
     if [[ -f "$errFile" ]]; then

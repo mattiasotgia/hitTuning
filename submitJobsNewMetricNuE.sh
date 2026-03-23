@@ -9,7 +9,7 @@
 # ==============================================================================
 
 # Source directory on the grid storage
-sourceDir="/pnfs/icarus/scratch/users/msotgia/hitTuning/mc/newMetric/gridBNBNuESearchSmall/"
+sourceDir="/pnfs/icarus/scratch/users/msotgia/hitTuning/mc/newMetric/gridBNBNuESearchSmallUpdatedMarch/"
 
 # Main executable script to run on grid nodes
 exe="runJob.sh"
@@ -22,7 +22,7 @@ export outputDir=$sourceDir                     # Output directory for results
 export nEvents=-1                               # Number of events to process (-1 = all)
 export anaFile="hitTuningNewMetric.py"          # Analysis script
 export treeName=""                              # Tree name for validation (optional)
-export gridFclPath="testOne"
+export gridFclPath="gridSearchUpdated"
 
 # Calculate number of jobs from FCL files
 nJobs=$(ls -l $PWD/$gridFclPath/*.fcl | wc -l)
