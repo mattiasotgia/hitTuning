@@ -367,3 +367,7 @@ testStudy
 
 *.tar.gz
 *.tar
+
+*.db
+
+*.root

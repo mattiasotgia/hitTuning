@@ -156,9 +156,6 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
 
         std::array<planeRecord, 3> mappedPlanes;
 
-        auto const &hitMCParticleAssns = 
-            *event.getValidHandle<art::Assns<recob::Hit, simb::MCParticle, anab::BackTrackerHitMatchingData>>("mcassociationsGausCryoE");
-
         auto const& mcHandle = 
             *event.getValidHandle<std::vector<simb::MCParticle>>("largeant");
 
@@ -239,30 +236,36 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
 
         // std::vector< const std::vector<recob::Hit>* > allHits = 
         //     {&hitsWW, &hitsWE, &hitsEW, &hitsEE};
-        
-        for (auto it = hitMCParticleAssns.begin(); it != hitMCParticleAssns.end(); ++it)
+
+        for (auto const& hitMCParticleAssnsLabel: {"mcassociationsGausCryoE", "mcassociationsGausCryoW"})
         {
-            auto const& [hit, mcParticle, _] = *it;
-            auto const& matchData = hitMCParticleAssns.data(it);
-            int plane = hit->WireID().getIndex<2>();
-            if (plane < 0 || plane > 2) continue;
+            auto const &hitMCParticleAssns = 
+                *event.getValidHandle<art::Assns<recob::Hit, simb::MCParticle, anab::BackTrackerHitMatchingData>>(hitMCParticleAssnsLabel);
+        
+            for (auto it = hitMCParticleAssns.begin(); it != hitMCParticleAssns.end(); ++it)
+            {
+                auto const& [hit, mcParticle, _] = *it;
+                auto const& matchData = hitMCParticleAssns.data(it);
+                int plane = hit->WireID().getIndex<2>();
+                if (plane < 0 || plane > 2) continue;
 
-            mappedPlanes[plane].hitPeakAmplitude.push_back(hit->PeakAmplitude());
-            mappedPlanes[plane].hitRms.push_back(hit->RMS());
-            mappedPlanes[plane].hitIntegral.push_back(hit->Integral());
-            mappedPlanes[plane].hitGoodnessOfFit.push_back(hit->GoodnessOfFit());
-            mappedPlanes[plane].hitFit.push_back(hit->GoodnessOfFit()/hit->DegreesOfFreedom());
-            mappedPlanes[plane].hitHitSummedAdc.push_back(hit->HitSummedADC());
-            mappedPlanes[plane].hitRoiSummedAdc.push_back(hit->ROISummedADC());
-            mappedPlanes[plane].hitChannel.push_back(hit->WireID().getIndex<3>());
-            mappedPlanes[plane].hitAreaRatio.push_back(hit->Integral()/hit->HitSummedADC());
+                mappedPlanes[plane].hitPeakAmplitude.push_back(hit->PeakAmplitude());
+                mappedPlanes[plane].hitRms.push_back(hit->RMS());
+                mappedPlanes[plane].hitIntegral.push_back(hit->Integral());
+                mappedPlanes[plane].hitGoodnessOfFit.push_back(hit->GoodnessOfFit());
+                mappedPlanes[plane].hitFit.push_back(hit->GoodnessOfFit()/hit->DegreesOfFreedom());
+                mappedPlanes[plane].hitHitSummedAdc.push_back(hit->HitSummedADC());
+                mappedPlanes[plane].hitRoiSummedAdc.push_back(hit->ROISummedADC());
+                mappedPlanes[plane].hitChannel.push_back(hit->WireID().getIndex<3>());
+                mappedPlanes[plane].hitAreaRatio.push_back(hit->Integral()/hit->HitSummedADC());
 
-            mappedPlanes[plane].pdgCode.push_back(mcParticle->PdgCode());
-            mappedPlanes[plane].hitEnergies.push_back(matchData.energy);
-            mappedPlanes[plane].hitIdeFraction.push_back(matchData.ideFraction);
-            mappedPlanes[plane].numberOfHits++;
+                mappedPlanes[plane].pdgCode.push_back(mcParticle->PdgCode());
+                mappedPlanes[plane].hitEnergies.push_back(matchData.energy);
+                mappedPlanes[plane].hitIdeFraction.push_back(matchData.ideFraction);
+                mappedPlanes[plane].numberOfHits++;
 
-            mappedPlanes[plane].hitEnergy += matchData.energy * matchData.ideFraction;
+                mappedPlanes[plane].hitEnergy += matchData.energy * matchData.ideFraction;
+            }
         }
 
         for (auto const& sc: simHandle)
