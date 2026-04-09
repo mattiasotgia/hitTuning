@@ -136,13 +136,13 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
         << event.numberOfEventsInFile() << " event(s)" << std::endl;
 
     std::unique_ptr<TFile> writer(new TFile(writerName.c_str(), "RECREATE"));
-    std::cout << "Created writer file " << writerName << std::endl;
+    // std::cout << "Created writer file " << writerName << std::endl;
     std::unique_ptr<TTree> data(new TTree("data", ""));
-    std::cout << "Created tree data" << std::endl;
+    // std::cout << "Created tree data" << std::endl;
 
     eventRecord thisEvent;
     data->Branch("thisEvent", &thisEvent);
-    std::cout << "Set Tree to write events" << std::endl;
+    // std::cout << "Set Tree to write events" << std::endl;
 
     std::vector<eventRecord> allEvents;
 
@@ -151,8 +151,6 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
 
         eventRecord eventTmp
             (event.eventAuxiliary().event(), event.eventAuxiliary().subRun(), event.eventAuxiliary().run()); 
-
-        std::cout << "Created temporary eventRecord" << std::endl;
 
         std::array<planeRecord, 3> mappedPlanes;
 
@@ -305,8 +303,6 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
     
     writer->cd();
     data->Write();
-
-    std::cout << "File is closed" << std::endl;
 
     std::vector<std::vector<double>> results;
     

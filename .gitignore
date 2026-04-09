@@ -371,3 +371,7 @@ testStudy
 *.db
 
 *.root
+
+fcl/
+plots/
+tarballs/
