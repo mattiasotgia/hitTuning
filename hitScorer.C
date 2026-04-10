@@ -1,39 +1,58 @@
 #pragma once 
 
-#include "gallery/Event.h"
-#include "canvas/Persistency/Common/Wrapper.h"
-#include "lardataobj/RecoBase/Hit.h"
-#include "lardataobj/RecoBase/Wire.h"
-#include "canvas/Utilities/InputTag.h"
-#include "gallery/ValidHandle.h"
-#include "gallery/Handle.h"
+// STL
+#include <algorithm>
+#include <iostream>
+#include <numeric>
+#include <vector>
+
+// art
+#include "art/Framework/Principal/Event.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+
+// art/canvas
 #include "canvas/Persistency/Common/FindMany.h"
-#include "canvas/Persistency/Common/FindOne.h"
 #include "canvas/Persistency/Common/FindManyP.h"
+#include "canvas/Persistency/Common/FindOne.h"
 #include "canvas/Persistency/Common/fwd.h"
 #include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/Wrapper.h"
 #include "canvas/Persistency/Provenance/Timestamp.h"
-#include "art/Framework/Principal/Event.h"
-#include "nusimdata/SimulationBase/MCTruth.h"
-#include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "canvas/Utilities/InputTag.h"
+
+// art/gallery
+#include "gallery/Event.h"
+#include "gallery/Handle.h"
+#include "gallery/ValidHandle.h"
+
+// nusimdata
 #include "nusimdata/SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+
 #include "larsim/MCCheater/ParticleInventoryService.h"
 #include "larsim/Utils/TruthMatchUtils.h"
+
+// LArSoft/lardata
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+
+// LArSoft/lardataobj
+#include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
 #include "lardataobj/Simulation/SimChannel.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+
+// SBNSoftware/sbnobj
 #include "sbnobj/ICARUS/TPC/ChannelROI.h"
+
+// ROOT
 #include "TCanvas.h"
-#include <iostream>
-#include <vector>
+#include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "TStyle.h"
-#include "TROOT.h"
 #include "TLegend.h"
-#include <numeric>
+#include "TROOT.h"
+#include "TStyle.h"
+#include "TTree.h"
 
 
 class planeRecord: public TObject
@@ -124,6 +143,26 @@ int getPlane(int channelID)
 const auto safeDivide = [](float a, float b) -> float {
     return b != 0.0f ? a / b : -1.0f;
 };
+
+template <typename T>
+double median(std::vector<T> storage) {
+
+    if (storage.empty()) {
+        throw std::invalid_argument("median of empty vector");
+    }
+
+    int n = storage.size();
+
+    std::nth_element(storage.begin(), storage.begin() + n/2, storage.end());
+    double self = storage[n/2];
+
+    if (n % 2 == 0) {
+        std::nth_element(storage.begin(), storage.begin() + n/2 - 1, storage.end());
+        self = (self + storage[n/2 - 1]) / 2.0;
+    }
+
+    return self;
+}
 
 std::vector<std::vector<double>> hitScorer(std::string file, std::string writerName = "tmp/testOneGalleryMetric/scorerTest.root")
 {
@@ -314,6 +353,12 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
             record.p0.hitEnergy, record.p1.hitEnergy, record.p2.hitEnergy, 
             record.p0.ideEnergy, record.p1.ideEnergy, record.p2.ideEnergy, 
             record.p0.planeRatio, record.p1.planeRatio, record.p2.planeRatio, 
+            median<double>(record.p0.hitGoodnessOfFit), 
+            median<double>(record.p1.hitGoodnessOfFit), 
+            median<double>(record.p2.hitGoodnessOfFit), 
+            median<double>(record.p0.hitFit), 
+            median<double>(record.p1.hitFit), 
+            median<double>(record.p2.hitFit), 
             record.protons, record.chargedPions, record.muons, 
             record.electrons, record.neutralPions, record.gammas
         });

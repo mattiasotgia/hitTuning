@@ -280,6 +280,9 @@ class RunDB:
     def close(self):
         self.conn.close()
 
+    def rollback(self):
+        self.conn.rollback()
+
 
 # ============================================================
 # 6. RUN LAR
@@ -464,6 +467,14 @@ def build_result_specs():
         ResultSpec('plane1Ratio'),
         ResultSpec('plane2Ratio'),
 
+        ResultSpec('plane0Chi2'),
+        ResultSpec('plane1Chi2'),
+        ResultSpec('plane2Chi2'),
+
+        ResultSpec('plane0Chi2NDF'),
+        ResultSpec('plane1Chi2NDF'),
+        ResultSpec('plane2Chi2NDF'),
+
         ResultSpec('protons', 'INTEGER'),
         ResultSpec('chargedPions', 'INTEGER'),
         ResultSpec('muons', 'INTEGER'),
@@ -555,25 +566,34 @@ def run_grid(template, fcl_file, run_number, input_file, output_file, macro_path
     # ==========================================================
     if is_root_file(input_file):
 
-        run_lar(fcl_file, input_file, output_file)
+        try: 
+            run_lar(fcl_file, input_file, output_file)
 
-        results_list = ROOT.hitScorer(output_file, histFile)
+            results_list = ROOT.hitScorer(output_file, histFile)
+        
+            for result in results_list:
+                db.insert(
+                    params,
+                    meta={
+                        'jobNum': run_number,
+                        'timestamp': datetime.now().isoformat(),
+                        'fcl_filename': fcl_file,
+                        'output_filename': output_file,
+                        'hist_filename': histFile
+                    },
+                    results=result_to_dict(result, result_specs)
+                )
+            
+            db.commit()  # Only commit if no exception
 
-        for result in results_list:
-            db.insert(
-                params,
-                meta={
-                    'jobNum': run_number,
-                    'timestamp': datetime.now().isoformat(),
-                    'fcl_filename': fcl_file,
-                    'output_filename': output_file,
-                    'hist_filename': histFile
-                },
-                results=result_to_dict(result, result_specs)
-            )
-
-        db.commit()
-        db.close()
+        except RuntimeError as Re:
+            print(f'Received an error from lar command: {Re}')
+            print(f'Skipping this point for these events ')
+            db.rollback()  # Undo any partial changes
+        
+        finally:
+            db.close()  # Always close, but don't commit here
+       
         return
 
     # ==========================================================
@@ -616,6 +636,14 @@ def run_grid(template, fcl_file, run_number, input_file, output_file, macro_path
 
                 if i % 100 == 0:
                     db.commit()
+            
+            db.commit()
+
+        except RuntimeError as Re:
+            print(f'Received an error from lar command: {Re}')
+            print(f'Skipping this point for these events ')
+            db.rollback()  
+            continue
 
         finally:
             os.remove(tmp_filename)
