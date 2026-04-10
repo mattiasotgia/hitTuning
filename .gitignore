@@ -355,3 +355,23 @@ deltaThreeP/filippoToIgnore/
 
 # Ignore envs 
 .env
+
+dbs/
+gridSearchBig/
+testOne/
+testStudy
+
+*dict*pcm
+*dictUmbrella.h
+*dict*h
+
+*.tar.gz
+*.tar
+
+*.db
+
+*.root
+
+fcl/
+plots/
+tarballs/

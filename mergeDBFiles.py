@@ -77,8 +77,14 @@ def merge_sqlite_dbs(db_files, dest_db, table="runs", conflict="ignore"):
 
 if __name__ == "__main__":
 
-    inputDir = '/nashome/m/micarrig/icarus/hitTuning/gridDBV2/'
-    dest_db = '/nashome/m/micarrig/icarus/hitTuning/hitTuning_merged_v2.db'
+    # inputDir = '/exp/icarus/app/users/msotgia/analysis/twoDRecoStudies/hitTuning/dbs/resultsNewMetricFeb26th'
+    # dest_db = '/exp/icarus/app/users/msotgia/analysis/twoDRecoStudies/hitTuning/hitTuning_merged_resultsNewMetricFeb26th.db'
+
+    # inputDir = '/exp/icarus/data/users/msotgia/hitTuning/resultsToMerge/NuesSim'
+    # dest_db = '/exp/icarus/data/users/msotgia/hitTuning/resultsToMerge/hitTuning_merged_resultsNewMetricMar22ndNues.db'
+
+    inputDir = '/exp/icarus/data/users/msotgia/hitTuning/resultsToMerge/FluxSim'
+    dest_db = '/exp/icarus/data/users/msotgia/hitTuning/resultsToMerge/hitTuning_merged_resultsNewMetricMar22ndFlux.db'
 
     db_files = []
     counter = 0
