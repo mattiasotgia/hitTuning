@@ -1,6 +1,6 @@
 # Hit Finder tuner :notes:
 
-This is a second version set of tools to allow a search for _optimal^[What is optimal, really? ]_ parameters for the hit finder algorithm [`sbncode/HitFinder/GaussHitFinderSBN`](https://github.com/SBNSoftware/sbncode/blob/develop/sbncode/HitFinder/GaussHitFinderSBN_module.cc). 
+This is a second version set of tools to allow a search for _optimal_[^1] parameters for the hit finder algorithm [`sbncode/HitFinder/GaussHitFinderSBN`](https://github.com/SBNSoftware/sbncode/blob/develop/sbncode/HitFinder/GaussHitFinderSBN_module.cc). 
 
 ## Content of the repository
 
@@ -18,9 +18,12 @@ The script `Tuner.py` is itself runing most of what is needed to do the grid sea
 tar -czf tarballs/python.tar.gz .env/
 ```
 
+
+
 Once the setup is complete, the _running_ part is documented [later on in this document](#grid-search-on-the-grid)
 
 # Grid search (on the grid)
 
 
 
+[^1]: What is optimal, really? 

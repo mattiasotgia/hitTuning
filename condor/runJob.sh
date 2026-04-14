@@ -196,6 +196,9 @@ if [ -f "${CONDOR_DIR_INPUT}/python.tar.gz" ]; then
     }
     source $work_dir/.env/bin/activate
     echo "PYTHONPATH is now: $PYTHONPATH"
+    LOCAL_SITE_PACKAGES=$work_dir/.env/lib/python3.9/site-packages
+    export PYTHONPATH=$LOCAL_SITE_PACKAGES:$PYTHONPATH
+    echo "PYTHONPATH is now: $PYTHONPATH"
     echo "List of installed product"
     pip list
 else
@@ -248,9 +251,9 @@ echo "  Output file: ${outputFile}"
 echo "  FCL file: ${fclFile}"
 
 pushd "${work_dir}" >/dev/null
-echo "Executing: python ${macro_file} -r -i ${inputFile} -f ${fclFile} -n ${jobNum} -p ${INPUT_TAR_DIR_LOCAL} -o ${work_dir}/${outputFile}"
+echo "Executing: python ${macro_file} run -t ${fclFile} -f ${fclFile} -r ${jobNum} -i ${inputFile} -o ${work_dir}/${outputFile} --macro-path ${INPUT_TAR_DIR_LOCAL}"
 
-if ! python ${macro_file} -r -i ${inputFile} -f ${fclFile} -n ${jobNum} -p ${INPUT_TAR_DIR_LOCAL} -o ${work_dir}/${outputFile}; then
+if ! python ${macro_file} run -t ${fclFile} -f ${fclFile} -r ${jobNum} -i ${inputFile} -o ${work_dir}/${outputFile} --macro-path ${INPUT_TAR_DIR_LOCAL}; then
     popd >/dev/null
     echo "ERROR: Command failed for file $runFile with exit code $?" >&2
     cleanup_and_exit 40

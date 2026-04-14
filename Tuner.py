@@ -1,13 +1,21 @@
 # stdlib
+import glob
 import os
 import re
 import sqlite3
 import subprocess
 import tempfile
+import yaml
 
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, List, Dict, Any
+
+# extlib
+import pandas as pd
+import numpy as np
+import click
+from tqdm import tqdm
 
 # ROOT/LArSoft specifics
 import ROOT
@@ -487,8 +495,6 @@ def build_result_specs():
 # 8. CLI
 # ============================================================
 
-import click
-
 @click.group()
 def cli():
     pass
@@ -653,5 +659,61 @@ def run_grid(template, fcl_file, run_number, input_file, output_file, macro_path
 
     print('All batches processed.')
 
-if __name__ == "__main__":
+
+@cli.command('merge')
+@click.option('-i', '--input-dir', required=True, help='Dir with .db files')
+@click.option('-o', '--output-db', required=True, help='Output merged .db file')
+@click.option('-r', '--reduce', type=str, help='YAML config for filter/agg')
+@click.option('--recursive', is_flag=True)
+@click.option('--no-aggregate', is_flag=True)
+def merge_dbs(input_dir, output_db, reduce, recursive, no_aggregate):
+    path_pattern = os.path.join(input_dir, '**', '*.db') if recursive else os.path.join(input_dir, '*.db')
+    db_files = glob.glob(path_pattern, recursive=recursive)
+    
+    if not db_files:
+        print('No databases found.'); return
+
+    print(f'Loading {len(db_files)} databases...')
+    df_list = []
+    for f in tqdm(db_files, desc='Loading Databases', unit='db'):
+        with sqlite3.connect(f) as conn:
+            df_list.append(pd.read_sql('SELECT * FROM runs', conn))
+    
+    full_df = pd.concat(df_list, ignore_index=True)
+    print(f'Total rows loaded from disk: {len(full_df)}')
+    print(full_df.describe())
+
+    if reduce:
+        with open(reduce, 'r') as f:
+            conf = yaml.safe_load(f)
+        
+        # 1. Filtering
+        for flt in conf.get('filters', []):
+            pre_filter = len(full_df)
+            full_df = full_df.query(flt)
+            print(f'Filter [{flt}]: {pre_filter} -> {len(full_df)} rows remaining')
+
+        print(f'Merged shape after filtering {full_df.shape}')
+        
+        # 2. Aggregation
+        if not no_aggregate:
+            agg_map = {col: method for method, cols in conf.get('aggregation', {}).items() for col in cols if col in full_df.columns}
+            final_df = full_df.groupby('jobNum').agg(agg_map).reset_index()
+
+        # 3. Post-Agg Ratios
+        for name, parts in conf.get('ratios', {}).items():
+            if all(p in final_df.columns for p in parts):
+                final_df[name] = final_df[parts[0]] / final_df[parts[1]].replace(0, np.nan)
+    else:
+        final_df = full_df
+
+    if output_db.endswith('.pkl'):
+        final_df.to_pickle(output_db)
+    else:
+        with sqlite3.connect(output_db) as conn:
+            final_df.to_sql('runs', conn, if_exists='replace', index=False)
+    print(f'Merge complete: {len(final_df)} jobs processed.')
+    print(final_df.describe())
+
+if __name__ == '__main__':
     cli()
