@@ -196,6 +196,9 @@ if [ -f "${CONDOR_DIR_INPUT}/python.tar.gz" ]; then
     }
     source $work_dir/.env/bin/activate
     echo "PYTHONPATH is now: $PYTHONPATH"
+    LOCAL_SITE_PACKAGES=$work_dir/.env/lib/python3.9/site-packages
+    export PYTHONPATH=$LOCAL_SITE_PACKAGES:$PYTHONPATH
+    echo "PYTHONPATH is now: $PYTHONPATH"
     echo "List of installed product"
     pip list
 else

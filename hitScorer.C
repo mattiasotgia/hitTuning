@@ -145,10 +145,11 @@ const auto safeDivide = [](float a, float b) -> float {
 };
 
 template <typename T>
-double median(std::vector<T> storage) {
+double median(std::vector<T> storage, T __d) {
 
     if (storage.empty()) {
-        throw std::invalid_argument("median of empty vector");
+        // throw std::invalid_argument("median of empty vector");
+        return __d;
     }
 
     int n = storage.size();
@@ -262,18 +263,6 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
         auto const& simHandle = 
             *event.getValidHandle<std::vector<sim::SimChannel>>("merge");
 
-        // auto const& hitsWW =
-        //    *event.getValidHandle<std::vector<recob::Hit>>({"gaushit2dTPCWW"});
-        // auto const& hitsWE =
-        //    *event.getValidHandle<std::vector<recob::Hit>>({"gaushit2dTPCWE"});
-        // auto const& hitsEW =
-        //    *event.getValidHandle<std::vector<recob::Hit>>({"gaushit2dTPCEW"});
-        // auto const& hitsEE =
-        //    *event.getValidHandle<std::vector<recob::Hit>>({"gaushit2dTPCEE"});
-
-        // std::vector< const std::vector<recob::Hit>* > allHits = 
-        //     {&hitsWW, &hitsWE, &hitsEW, &hitsEE};
-
         for (auto const& hitMCParticleAssnsLabel: {"mcassociationsGausCryoE", "mcassociationsGausCryoW"})
         {
             auto const &hitMCParticleAssns = 
@@ -353,12 +342,12 @@ std::vector<std::vector<double>> hitScorer(std::string file, std::string writerN
             record.p0.hitEnergy, record.p1.hitEnergy, record.p2.hitEnergy, 
             record.p0.ideEnergy, record.p1.ideEnergy, record.p2.ideEnergy, 
             record.p0.planeRatio, record.p1.planeRatio, record.p2.planeRatio, 
-            median<double>(record.p0.hitGoodnessOfFit), 
-            median<double>(record.p1.hitGoodnessOfFit), 
-            median<double>(record.p2.hitGoodnessOfFit), 
-            median<double>(record.p0.hitFit), 
-            median<double>(record.p1.hitFit), 
-            median<double>(record.p2.hitFit), 
+            median<double>(record.p0.hitGoodnessOfFit, -1.), 
+            median<double>(record.p1.hitGoodnessOfFit, -1.), 
+            median<double>(record.p2.hitGoodnessOfFit, -1.), 
+            median<double>(record.p0.hitFit, -1.), 
+            median<double>(record.p1.hitFit, -1.), 
+            median<double>(record.p2.hitFit, -1.), 
             record.protons, record.chargedPions, record.muons, 
             record.electrons, record.neutralPions, record.gammas
         });

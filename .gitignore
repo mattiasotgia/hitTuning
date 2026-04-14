@@ -375,3 +375,7 @@ testStudy
 fcl/
 plots/
 tarballs/
+
+*.list
+*.pkl
+*.yaml
